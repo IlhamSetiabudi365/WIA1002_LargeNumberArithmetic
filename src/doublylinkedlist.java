@@ -1,5 +1,5 @@
 package src;
 
-public class doublylinkedlist {
+public class DoublyLinkedList {
     
 }

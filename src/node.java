@@ -1,5 +1,5 @@
 package src;
 
-public class node {
+public class Node {
     
 }
