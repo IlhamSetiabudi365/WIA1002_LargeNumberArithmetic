@@ -66,4 +66,43 @@ public class DoublyLinkedList {
             curr = curr.next;
         }
     }
+
+    public void stripLeadingZeros(){
+        while(head.digit == 0 && size > 1){
+            head = head.next;
+            head.prev = null;
+            size--;
+        }
+    }
+
+    public static int compare(DoublyLinkedList a, DoublyLinkedList b){
+        if(a.size > b.size){
+            return 1;
+        }
+        else if(a.size < b.size){
+            return -1;
+        }
+        else if (a.size == b.size){
+            Node currA = a.head;
+            Node currB = b.head;
+            
+            while(currA != null && currB != null){
+                if (currA.digit > currB.digit){return 1;}
+                if (currA.digit < currB.digit){return -1;}
+                currA = currA.next;
+                currB = currB.next;
+            }
+        }
+        return 0;
+    }
+
+    public static DoublyLinkedList copy(DoublyLinkedList originalList){
+        DoublyLinkedList copiedList = new DoublyLinkedList();
+        Node curr = originalList.head;
+        while(curr != null){
+            copiedList.addBack(curr.digit);
+            curr = curr.next;
+        }
+        return copiedList;
+    }
 }
