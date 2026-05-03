@@ -7,12 +7,14 @@ package src;
  * Used by: ALL ROLES — every number in this project is made of these nodes.
  */
 public class Node {
-    int digit;  // the digit value (0-9)
-    Node next;  // pointer to the next node (towards least significant digit / tail)
-    Node prev;  // pointer to the previous node (towards most significant digit / head)
+    public int digit;  // the digit value (0-9)
+    public Node next;  // pointer to the next node (towards least significant digit / tail)
+    public Node prev;  // pointer to the previous node (towards most significant digit / head)
 
     public Node(int digit){
         this.digit = digit;
+        this.next = null;
+        this.prev = null;
         // next and prev are automatically null — connection happens inside DoublyLinkedList
     }
 }

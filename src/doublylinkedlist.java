@@ -13,6 +13,9 @@ public class DoublyLinkedList {
         isNegative = false;
     }
 
+    public Node getTail() { return this.tail; }
+    
+    public void setNegative(boolean val) { this.isNegative = val; }
     /**
      * Adds a new digit node to the END (tail) of the list.
      * Used by: parse(), copy(), appendZero()
