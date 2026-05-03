@@ -6,6 +6,7 @@ public class ArithmeticEngine {
 
         Node pA = a.getTail();
         Node pB = b.getTail();
+        int carry = 0;
 
         return null;
     }
