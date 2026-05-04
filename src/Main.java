@@ -26,5 +26,9 @@ public class Main{
         DoublyLinkedList g = DoublyLinkedList.parse("42");
         DoublyLinkedList.appendZero(g);
         g.display(); // should print 420
+
+        DoublyLinkedList sumEG = ArithmeticEngine.add(e, g);
+        sumEG.display();
+        
     }
 }
