@@ -16,6 +16,8 @@ public class DoublyLinkedList {
     public Node getTail() { return this.tail; }
     
     public void setNegative(boolean val) { this.isNegative = val; }
+
+    public boolean isNegative() { return this.isNegative; }
     /**
      * Adds a new digit node to the END (tail) of the list.
      * Used by: parse(), copy(), appendZero()
@@ -81,17 +83,23 @@ public class DoublyLinkedList {
      * Useful for: ROLE 5 (CLI) — call this to print the final result of any operation.
      */
     public void display(){
+        System.out.println(this);
+    }
+
+    public String toString(){
+        StringBuilder number = new StringBuilder();
         Node curr = head;
         
         if(isNegative == true){
-            System.out.print("-");
+            number.append("-");
         }
 
         while(curr != null){
-            System.out.print(curr.digit);
+            number.append(curr.digit);
             curr = curr.next;
         }
-        System.out.println();
+
+        return number.toString();
     }
 
     /**
@@ -103,6 +111,11 @@ public class DoublyLinkedList {
      *             ROLE 4 (division) — call after building the quotient.
      */
     public void stripLeadingZeros(){
+        if (head == null) {
+            addBack(0);
+            return;
+        }
+
         while(head.digit == 0 && size > 1){
             head = head.next;
             head.prev = null;

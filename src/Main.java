@@ -1,34 +1,74 @@
 package src;
 
+import java.util.Scanner;
+
 public class Main{
     public static void main(String[] args){
-        // Test 1: basic parse and display
-        DoublyLinkedList a = DoublyLinkedList.parse("12345");
-        a.display(); // should print 12345
+        Scanner scanner = new Scanner(System.in);
 
-        // Test 2: strip leading zeros
-        DoublyLinkedList b = DoublyLinkedList.parse("00123");
-        b.stripLeadingZeros();
-        b.display(); // should print 123
+        System.out.println("Input:");
+        String firstNumber = readNumber(scanner, "m = ");
+        String secondNumber = readNumber(scanner, "n = ");
 
-        // Test 3: compare
-        DoublyLinkedList c = DoublyLinkedList.parse("999");
-        DoublyLinkedList d = DoublyLinkedList.parse("1000");
-        System.out.println(DoublyLinkedList.compare(c, d)); // should print -1
+        DoublyLinkedList m = DoublyLinkedList.parse(firstNumber);
+        DoublyLinkedList n = DoublyLinkedList.parse(secondNumber);
 
-        // Test 4: copy independence
-        DoublyLinkedList e = DoublyLinkedList.parse("42");
-        DoublyLinkedList f = DoublyLinkedList.copy(e);
-        f.addBack(9);
-        e.display(); // should still print 42, not 429
+        System.out.println();
+        System.out.println("Output:");
+        printResult("addition", () -> ArithmeticEngine.add(m, n));
+        printResult("subtraction", () -> ArithmeticEngine.subtract(m, n));
+        printResult("multiplication", () -> ArithmeticEngine.multiply(m, n));
+        printResult("division", () -> calculateDivision(m, n));
+    }
 
-        // Test 5: appendZero
-        DoublyLinkedList g = DoublyLinkedList.parse("42");
-        DoublyLinkedList.appendZero(g);
-        g.display(); // should print 420
+    private static String readNumber(Scanner scanner, String prompt){
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine().trim();
 
-        DoublyLinkedList sumEG = ArithmeticEngine.add(e, g);
-        sumEG.display();
-        
+            if (isValidWholeNumber(input)) {
+                return input;
+            }
+
+            System.out.println("Please enter a non-negative whole number using digits only.");
+        }
+    }
+
+    private static boolean isValidWholeNumber(String input){
+        if (input.isEmpty()) {
+            return false;
+        }
+
+        for (int i = 0; i < input.length(); i++) {
+            if (!Character.isDigit(input.charAt(i))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static DoublyLinkedList calculateDivision(DoublyLinkedList m, DoublyLinkedList n){
+        if (n.toString().equals("0")) {
+            throw new ArithmeticException("Cannot divide by zero.");
+        }
+
+        return ArithmeticEngine.divide(m, n);
+    }
+
+    private static void printResult(String operation, Operation calculation){
+        try {
+            DoublyLinkedList result = calculation.run();
+            result.stripLeadingZeros();
+            System.out.println(operation + " = " + result);
+        } catch (UnsupportedOperationException ex) {
+            System.out.println(operation + " = " + ex.getMessage());
+        } catch (ArithmeticException ex) {
+            System.out.println(operation + " = " + ex.getMessage());
+        }
+    }
+
+    private interface Operation {
+        DoublyLinkedList run();
     }
 }

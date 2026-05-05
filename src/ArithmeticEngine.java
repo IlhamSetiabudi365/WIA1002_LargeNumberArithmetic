@@ -23,6 +23,19 @@ public class ArithmeticEngine {
 
         }
         
+        result.stripLeadingZeros();
         return result;
+    }
+
+    public static DoublyLinkedList subtract(DoublyLinkedList a, DoublyLinkedList b){
+        throw new UnsupportedOperationException("Subtraction is not implemented yet.");
+    }
+
+    public static DoublyLinkedList multiply(DoublyLinkedList a, DoublyLinkedList b){
+        throw new UnsupportedOperationException("Multiplication is not implemented yet.");
+    }
+
+    public static DoublyLinkedList divide(DoublyLinkedList a, DoublyLinkedList b){
+        throw new UnsupportedOperationException("Division is not implemented yet.");
     }
 }
