@@ -74,7 +74,118 @@ public class ArithmeticEngine {
         throw new UnsupportedOperationException("Multiplication is not implemented yet.");
     }
 
-    public static DoublyLinkedList divide(DoublyLinkedList a, DoublyLinkedList b){
-        throw new UnsupportedOperationException("Division is not implemented yet.");
+    public static DoublyLinkedList divide(DoublyLinkedList a, DoublyLinkedList b) {
+
+        // ROLE 4 - Division (Integer + Decimal)
+        // Pendekatan: cari kelipatan b yang pas, kurangi dari dividend terus
+        // sampai sisa (remainder) nya 0 atau udah 20 angka desimal
+
+        // Guard: cek dulu kalau b nya nol, ga boleh bagi nol
+        if (b.toString().equals("0")) {
+            throw new ArithmeticException("Error: tidak bisa bagi dengan nol!");
+        }
+
+        // kalau a nya 0, hasilnya pasti 0 langsung
+        if (a.toString().equals("0")) {
+            return DoublyLinkedList.parse("0");
+        }
+
+        // remainder = sisa yang belum habis dibagi, mulai dari a
+        // quotient  = hasil bagi, mulai dari 0
+        DoublyLinkedList remainder = DoublyLinkedList.copy(a);
+        DoublyLinkedList quotient  = DoublyLinkedList.parse("0");
+
+        // BAGIAN INTEGER
+        // selama remainder masih >= b, cari kelipatan b yang paling
+        // besar tapi masih muat di remainder, terus kurangi
+        while (DoublyLinkedList.compare(remainder, b) >= 0) {
+
+            // scale up b dulu - kalikan b dengan 10 berulang kali
+            // sampai b * 10 sudah tidak muat lagi di dalam remainder
+            DoublyLinkedList scaledB = DoublyLinkedList.copy(b);
+            int zeroCount = 0;
+
+            // tempCheck = scaledB * 10, buat ngecek apakah masih muat
+            DoublyLinkedList tempCheck = DoublyLinkedList.copy(scaledB);
+            DoublyLinkedList.appendZero(tempCheck);
+
+            while (DoublyLinkedList.compare(tempCheck, remainder) <= 0) {
+                DoublyLinkedList.appendZero(scaledB);
+                zeroCount++;
+
+                tempCheck = DoublyLinkedList.copy(scaledB);
+                DoublyLinkedList.appendZero(tempCheck);
+            }
+
+            // hitung berapa kali scaledB bisa dikurangi dari remainder
+            // ini ngasih satu digit dari hasil bagi
+            int digitCount = 0;
+            while (DoublyLinkedList.compare(remainder, scaledB) >= 0) {
+                remainder = subtract(remainder, scaledB); // pakai Role 2
+                digitCount++;
+            }
+
+            // tambahkan digitCount * 10^zeroCount ke quotient
+            // contoh: digitCount=3, zeroCount=2 -> toAdd = 300
+            DoublyLinkedList toAdd = DoublyLinkedList.parse(String.valueOf(digitCount));
+            for (int i = 0; i < zeroCount; i++) {
+                DoublyLinkedList.appendZero(toAdd);
+            }
+            quotient = add(quotient, toAdd); // pakai Role 2
+        }
+
+        quotient.stripLeadingZeros();
+
+        // kalau remainder sudah 0, berarti bagi pas, ga perlu desimal
+        if (remainder.toString().equals("0")) {
+            return quotient;
+        }
+
+        // BAGIAN DESIMAL
+        // remainder masih ada, lanjut hitung angka di belakang koma
+        // kalikan remainder dengan 10 (appendZero), cari berapa kali b muat
+        // ulangi sampai 20 angka atau remainder habis
+        StringBuilder decimalDigits = new StringBuilder();
+        int decimalCount = 0;
+
+        while (decimalCount < 20) {
+
+            // kalikan remainder dengan 10 (pakai Role 1)
+            DoublyLinkedList.appendZero(remainder);
+
+            // hitung berapa kali b muat di remainder yang udah dikali 10
+            int digit = 0;
+            while (DoublyLinkedList.compare(remainder, b) >= 0) {
+                remainder = subtract(remainder, b); // pakai Role 2
+                digit++;
+            }
+
+            decimalDigits.append(digit);
+            decimalCount++;
+
+            // kalau sisa nya udah 0, berhenti lebih awal
+            if (remainder.toString().equals("0")) {
+                break;
+            }
+        }
+
+        // GABUNGIN HASIL INTEGER + DESIMAL
+        // DoublyLinkedList ga bisa simpan titik desimal "."
+        // jadi pakai anonymous class yang override toString()
+        // supaya bisa nampilin "123.456" dengan benar
+        final String integerResult = quotient.toString();
+        final String decimalResult = decimalDigits.toString();
+
+        return new DoublyLinkedList() {
+            @Override
+            public String toString() {
+                return integerResult + "." + decimalResult;
+            }
+
+            @Override
+            public void stripLeadingZeros() {
+                // ga perlu strip, udah beres di atas
+            }
+        };
     }
 }
