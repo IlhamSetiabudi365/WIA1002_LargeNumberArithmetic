@@ -70,9 +70,70 @@ public class ArithmeticEngine {
 
     }
 
-    public static DoublyLinkedList multiply(DoublyLinkedList a, DoublyLinkedList b){
-        throw new UnsupportedOperationException("Multiplication is not implemented yet.");
+    public static DoublyLinkedList multiply(DoublyLinkedList a, DoublyLinkedList b) {
+    // 1. Handle base cases (if either number is 0)
+    if (isZero(a) || isZero(b)) {
+        return DoublyLinkedList.parse("0");
     }
+
+    DoublyLinkedList finalResult = DoublyLinkedList.parse("0");
+    Node pB = b.getTail();
+    int shiftCount = 0; // Tracks how many zeros to append for place value (tens, hundreds, etc.)
+
+    // 2. Loop through each digit of the second number (multiplier) from right to left
+    while (pB != null) {
+        int digitB = pB.digit;
+        
+        // Skip multiplication if the digit is 0 to save time, just increment the shift
+        if (digitB == 0) {
+            shiftCount++;
+            pB = pB.prev;
+            continue;
+        }
+
+        DoublyLinkedList partialProduct = new DoublyLinkedList();
+        Node pA = a.getTail();
+        int carry = 0;
+
+        // 3. Multiply digitB with every digit of List A
+        while (pA != null || carry != 0) {
+            int digitA = (pA != null) ? pA.digit : 0;
+            
+            int product = (digitA * digitB) + carry;
+            carry = product / 10;
+            partialProduct.addFront(product % 10);
+
+            if (pA != null) pA = pA.prev;
+        }
+
+        // 4. Shift the partial product by appending zeros based on its position
+        for (int i = 0; i < shiftCount; i++) {
+            DoublyLinkedList.appendZero(partialProduct);
+        }
+
+        // 5. Add this partial product to our running final total
+        finalResult = ArithmeticEngine.add(finalResult, partialProduct);
+
+        // Move to the next digit to the left in List B
+        shiftCount++;
+        pB = pB.prev;
+    }
+
+    // 6. Final cleanup of signs and leading zeros
+    // (Positive * Negative = Negative, Negative * Negative = Positive)
+    boolean resultIsNegative = a.isNegative() ^ b.isNegative(); // XOR logic for signs
+    finalResult.setNegative(resultIsNegative);
+    
+    finalResult.stripLeadingZeros();
+    return finalResult;
+}
+
+// Helper method to check if a list represents zero
+private static boolean isZero(DoublyLinkedList list) {
+    if (list == null || list.getTail() == null) return true;
+    // If it's a single node containing 0, or if stripLeadingZeros makes it just '0'
+    return list.getTail().digit == 0 && DoublyLinkedList.compare(list, DoublyLinkedList.parse("0")) == 0;
+}
 
     public static DoublyLinkedList divide(DoublyLinkedList a, DoublyLinkedList b) {
 
