@@ -72,6 +72,7 @@ public class DoublyLinkedList {
             int digit = Character.getNumericValue(ch);
             list.addBack(digit);
         }
+        list.stripLeadingZeros();
         return list;
     }
 
@@ -103,6 +104,24 @@ public class DoublyLinkedList {
     }
 
     /**
+     * Builds a display-only result such as "2.5" for division answers.
+     * Decimal answers are not used as inputs for another arithmetic operation.
+     */
+    public static DoublyLinkedList decimalResult(String value) {
+        return new DoublyLinkedList() {
+            @Override
+            public String toString() {
+                return value;
+            }
+
+            @Override
+            public void stripLeadingZeros() {
+                // Already normalized before this display-only result is created.
+            }
+        };
+    }
+
+    /**
      * Removes leading zero nodes from the front of the list.
      * Stops when the head digit is non-zero OR only one node remains (to preserve "0" as a valid result).
      * Example: [0] ↔ [0] ↔ [1] ↔ [2] → [1] ↔ [2]
@@ -120,6 +139,10 @@ public class DoublyLinkedList {
             head = head.next;
             head.prev = null;
             size--;
+        }
+
+        if (size == 1 && head.digit == 0) {
+            isNegative = false;
         }
     }
 

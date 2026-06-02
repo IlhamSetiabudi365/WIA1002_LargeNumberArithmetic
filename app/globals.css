@@ -1,0 +1,68 @@
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --app-bg: #0b0f1a;
+  --panel: #111827;
+  --panel-soft: #151b2b;
+  --line: rgba(148, 163, 184, 0.16);
+  --line-strong: rgba(167, 139, 250, 0.42);
+  --accent: #8b5cf6;
+  --accent-soft: rgba(139, 92, 246, 0.16);
+  --accent-bright: #a78bfa;
+  --text: #eef2ff;
+  --muted: #94a3b8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--app-bg);
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(139, 92, 246, 0.14), transparent 34rem),
+    linear-gradient(135deg, #0b0f1a 0%, #101624 46%, #0b0f1a 100%);
+  color: var(--text);
+  font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(139, 92, 246, 0.45);
+  color: white;
+}
+
+.dll-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.45) rgba(15, 23, 42, 0.55);
+}
+
+.dll-scroll::-webkit-scrollbar {
+  height: 10px;
+}
+
+.dll-scroll::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.55);
+  border-radius: 999px;
+}
+
+.dll-scroll::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45);
+  border-radius: 999px;
+}
+
+.dll-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(203, 213, 225, 0.62);
+}
