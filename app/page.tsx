@@ -26,6 +26,7 @@ const speedPresets = [
   { label: "Fast", value: 350 }
 ];
 
+// All interactive UI data is kept in one reducer so step navigation stays predictable.
 type VisualizerState = {
   m: string;
   n: string;
@@ -46,14 +47,24 @@ type VisualizerAction =
   | { type: "toggle-auto" }
   | { type: "set-speed"; speed: number };
 
+/**
+ * Keeps input values numeric and falls back to 0 when the field is empty.
+ */
 function sanitizeDigits(value: string) {
   return value.replace(/\D/g, "") || "0";
 }
 
+/**
+ * Builds a fresh arithmetic run for the current input and selected operation.
+ */
 function createRun(m: string, n: string, operation: Operation) {
   return runOperation(sanitizeDigits(m), sanitizeDigits(n), operation);
 }
 
+/**
+ * Handles all visualizer state transitions: input editing, operation changes,
+ * manual step navigation, and autoplay.
+ */
 function reducer(state: VisualizerState, action: VisualizerAction): VisualizerState {
   if (action.type === "set-m") {
     return { ...state, m: sanitizeDigits(action.value), autoPlay: false };
@@ -111,6 +122,9 @@ function reducer(state: VisualizerState, action: VisualizerAction): VisualizerSt
   return state;
 }
 
+/**
+ * Marks nodes that have already been processed in the current right-to-left step.
+ */
 function processedIndices(nodes: DLLNode[], active: number[], stepIndex: number) {
   if (stepIndex === 0 || nodes.length === 0) {
     return [];
@@ -124,6 +138,9 @@ function processedIndices(nodes: DLLNode[], active: number[], stepIndex: number)
   return nodes.map((_, index) => index).filter((index) => index > minActive && !active.includes(index));
 }
 
+/**
+ * Shows the explanation and partial result for the current algorithm step.
+ */
 function StepDetails({ step }: { step: Step }) {
   const facts = [
     step.carry !== undefined ? `carry = ${step.carry}` : null,
@@ -173,6 +190,9 @@ function StepDetails({ step }: { step: Step }) {
   );
 }
 
+/**
+ * Horizontally scrollable row used for a single linked-list memory view.
+ */
 function MemoryRow({
   children,
   label,
@@ -208,6 +228,9 @@ function MemoryRow({
   );
 }
 
+/**
+ * Keeps the input rows aligned to the tail so right-to-left arithmetic is easier to follow.
+ */
 function MemoryScrollGroup({
   children,
   railStyle,
@@ -240,6 +263,9 @@ function MemoryScrollGroup({
   );
 }
 
+/**
+ * Static wrapper for a labeled memory row.
+ */
 function MemoryStaticRow({ children, label }: { children: ReactNode; label: string }) {
   return (
     <div className="space-y-1">
@@ -249,6 +275,9 @@ function MemoryStaticRow({ children, label }: { children: ReactNode; label: stri
   );
 }
 
+/**
+ * Main page for the large-number arithmetic visualizer.
+ */
 export default function Home() {
   const [state, dispatch] = useReducer(reducer, undefined, () => {
     const m = "1234";
@@ -285,6 +314,7 @@ export default function Home() {
   );
   const memoryRailStyle = { minWidth: `${memorySlots * 92 + 170}px` };
 
+  // Autoplay advances the timeline at the selected speed and stops at the final step.
   useEffect(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -310,7 +340,7 @@ export default function Home() {
         <section className="border-b border-slate-700/30 pb-5">
           <div className="flex flex-col gap-5">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">Large Number Visualizer</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">DigiTrace</h1>
               <p className="mt-1 text-sm text-slate-400">Trace big integer operations through doubly linked list nodes.</p>
             </div>
 

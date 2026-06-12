@@ -2,6 +2,15 @@ package src;
 
 import java.util.Scanner;
 
+/**
+ * Entry point for the command-line version of the project.
+ *
+ * This class is responsible only for:
+ * - reading and validating user input,
+ * - converting the input strings into doubly linked lists,
+ * - calling the arithmetic engine,
+ * - printing each final answer.
+ */
 public class Main{
     public static void main(String[] args){
         Scanner scanner = new Scanner(System.in);
@@ -21,6 +30,10 @@ public class Main{
         printResult("division", () -> calculateDivision(m, n));
     }
 
+    /**
+     * Keeps asking the user for a number until the input is valid.
+     * The assignment works with non-negative whole numbers, so only digits are accepted.
+     */
     private static String readNumber(Scanner scanner, String prompt){
         while (true) {
             System.out.print(prompt);
@@ -34,6 +47,9 @@ public class Main{
         }
     }
 
+    /**
+     * Checks whether the input contains at least one character and all characters are digits.
+     */
     private static boolean isValidWholeNumber(String input){
         if (input.isEmpty()) {
             return false;
@@ -48,6 +64,9 @@ public class Main{
         return true;
     }
 
+    /**
+     * Handles the special division-by-zero case before calling the arithmetic engine.
+     */
     private static DoublyLinkedList calculateDivision(DoublyLinkedList m, DoublyLinkedList n){
         if (n.toString().equals("0")) {
             throw new ArithmeticException("Cannot divide by zero.");
@@ -56,6 +75,9 @@ public class Main{
         return ArithmeticEngine.divide(m, n);
     }
 
+    /**
+     * Runs one arithmetic operation and prints either the result or a readable error message.
+     */
     private static void printResult(String operation, Operation calculation){
         try {
             DoublyLinkedList result = calculation.run();
@@ -68,6 +90,9 @@ public class Main{
         }
     }
 
+    /**
+     * Small functional interface so each arithmetic operation can be passed into printResult().
+     */
     private interface Operation {
         DoublyLinkedList run();
     }

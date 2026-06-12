@@ -2,19 +2,18 @@ package src;
 
 /**
  * Represents a single digit in a large number.
+ *
  * Each node stores one digit (0-9) and pointers to its neighbors.
  * The full number is formed by chaining nodes together in a DoublyLinkedList.
- * Used by: ALL ROLES — every number in this project is made of these nodes.
  */
 public class Node {
-    public int digit;  // the digit value (0-9)
-    public Node next;  // pointer to the next node (towards least significant digit / tail)
-    public Node prev;  // pointer to the previous node (towards most significant digit / head)
+    public int digit;  // Digit value from 0 to 9.
+    public Node next;  // Next node toward the least significant digit.
+    public Node prev;  // Previous node toward the most significant digit.
 
     public Node(int digit){
         this.digit = digit;
         this.next = null;
         this.prev = null;
-        // next and prev are automatically null — connection happens inside DoublyLinkedList
     }
 }

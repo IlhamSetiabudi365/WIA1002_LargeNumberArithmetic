@@ -1,3 +1,5 @@
+// Shared arithmetic logic for the web visualizer.
+// The visualizer uses arrays of digit nodes so it can animate each node and step.
 export type DLLNode = {
   digit: number;
   id: string;
@@ -30,6 +32,10 @@ let idCounter = 0;
 
 const makeId = (prefix: string) => `${prefix}-${idCounter++}`;
 
+/**
+ * Converts user input into digit nodes.
+ * Non-digit characters are ignored so the UI always works with valid digits.
+ */
 export function parseDigits(value: string, prefix = "n"): DLLNode[] {
   const digits = value.replace(/\D/g, "").split("");
   const safeDigits = digits.length > 0 ? digits : ["0"];
@@ -39,6 +45,9 @@ export function parseDigits(value: string, prefix = "n"): DLLNode[] {
   }));
 }
 
+/**
+ * Converts a list of digit nodes into a plain string.
+ */
 export function nodesToString(nodes: DLLNode[]): string {
   if (nodes.length === 0) {
     return "0";
@@ -47,6 +56,9 @@ export function nodesToString(nodes: DLLNode[]): string {
   return nodes.map((node) => node.digit).join("");
 }
 
+/**
+ * Removes leading zeros while keeping one zero for the value 0.
+ */
 export function stripLeadingZeros(nodes: DLLNode[], prefix = "s"): DLLNode[] {
   let index = 0;
   while (index < nodes.length - 1 && nodes[index].digit === 0) {
@@ -57,6 +69,9 @@ export function stripLeadingZeros(nodes: DLLNode[], prefix = "s"): DLLNode[] {
   return stripped.length > 0 ? cloneNodes(stripped, prefix) : makeNodesFromString("0", prefix);
 }
 
+/**
+ * Builds digit nodes from an already-normalized numeric string.
+ */
 export function makeNodesFromString(value: string, prefix = "r"): DLLNode[] {
   return value.split("").map((digit, index) => ({
     digit: Number(digit),
@@ -64,6 +79,9 @@ export function makeNodesFromString(value: string, prefix = "r"): DLLNode[] {
   }));
 }
 
+/**
+ * Creates fresh nodes so animation keys remain stable and independent per step.
+ */
 function cloneNodes(nodes: DLLNode[], prefix = "c"): DLLNode[] {
   return nodes.map((node, index) => ({
     digit: node.digit,
@@ -71,6 +89,10 @@ function cloneNodes(nodes: DLLNode[], prefix = "c"): DLLNode[] {
   }));
 }
 
+/**
+ * Compares two non-negative integer strings without converting them to Number.
+ * This keeps the visualizer safe for very large values.
+ */
 function compareStrings(a: string, b: string): number {
   const left = trimZeros(a);
   const right = trimZeros(b);
@@ -82,11 +104,17 @@ function compareStrings(a: string, b: string): number {
   return 0;
 }
 
+/**
+ * Normalizes a string by removing unnecessary leading zeros.
+ */
 function trimZeros(value: string): string {
   const trimmed = value.replace(/^0+(?=\d)/, "");
   return trimmed.length > 0 ? trimmed : "0";
 }
 
+/**
+ * Subtracts b from a for non-negative integer strings where a >= b.
+ */
 function subtractStrings(a: string, b: string): string {
   let i = a.length - 1;
   let j = b.length - 1;
@@ -112,6 +140,9 @@ function subtractStrings(a: string, b: string): string {
   return trimZeros(out.join(""));
 }
 
+/**
+ * Adds two non-negative integer strings digit by digit.
+ */
 function addStrings(a: string, b: string): string {
   let i = a.length - 1;
   let j = b.length - 1;
@@ -131,6 +162,9 @@ function addStrings(a: string, b: string): string {
   return trimZeros(out.join(""));
 }
 
+/**
+ * Creates one step object for the visualizer timeline.
+ */
 function makeStep(
   description: string,
   activeIndices: { a: number[]; b: number[] },
@@ -146,6 +180,9 @@ function makeStep(
   };
 }
 
+/**
+ * Adds setup steps when the input contains leading zeros that need to be stripped.
+ */
 function normalizationSteps(rawA: DLLNode[], rawB: DLLNode[], a: DLLNode[], b: DLLNode[]): Step[] {
   const steps: Step[] = [];
   const removedA: number[] = [];
@@ -181,6 +218,9 @@ function normalizationSteps(rawA: DLLNode[], rawB: DLLNode[], a: DLLNode[], b: D
   return steps;
 }
 
+/**
+ * Adds two digit-node arrays while recording every carry step.
+ */
 export function add(a: DLLNode[], b: DLLNode[]): { result: DLLNode[]; steps: Step[] } {
   const steps: Step[] = [];
   const resultDigits: number[] = [];
@@ -214,6 +254,10 @@ export function add(a: DLLNode[], b: DLLNode[]): { result: DLLNode[]; steps: Ste
   return { result, steps };
 }
 
+/**
+ * Subtracts b from a while recording every borrow step.
+ * If b is larger, the result string is handled as negative by runOperation().
+ */
 export function subtract(a: DLLNode[], b: DLLNode[]): { result: DLLNode[]; steps: Step[] } {
   const steps: Step[] = [];
   const cmp = compareStrings(nodesToString(a), nodesToString(b));
@@ -269,6 +313,9 @@ export function subtract(a: DLLNode[], b: DLLNode[]): { result: DLLNode[]; steps
   return { result, steps };
 }
 
+/**
+ * Multiplies two digit-node arrays with partial products, just like manual multiplication.
+ */
 export function multiply(a: DLLNode[], b: DLLNode[]): { result: DLLNode[]; steps: Step[] } {
   const steps: Step[] = [];
   const partialRows: DLLNode[][] = [];
@@ -336,6 +383,10 @@ export function multiply(a: DLLNode[], b: DLLNode[]): { result: DLLNode[]; steps
   return { result, steps };
 }
 
+/**
+ * Divides a by b and records both integer and decimal calculation steps.
+ * Decimal output is limited to 20 places, matching the Java CLI behavior.
+ */
 export function divide(a: DLLNode[], b: DLLNode[]): { result: DLLNode[]; steps: Step[]; resultString: string } {
   const steps: Step[] = [];
   const divisor = nodesToString(b);
@@ -431,6 +482,10 @@ export function divide(a: DLLNode[], b: DLLNode[]): { result: DLLNode[]; steps: 
   };
 }
 
+/**
+ * Main dispatcher used by the UI.
+ * It normalizes inputs, runs the selected operation, and returns result plus animation steps.
+ */
 export function runOperation(rawM: string, rawN: string, operation: Operation): ArithmeticRun {
   const rawA = parseDigits(rawM, "raw-m");
   const rawB = parseDigits(rawN, "raw-n");

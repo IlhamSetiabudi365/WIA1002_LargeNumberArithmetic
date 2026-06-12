@@ -3,6 +3,9 @@
 import type { DLLNode as DLLNodeType } from "@/lib/arithmetic";
 import { DLLNode } from "@/components/DLLNode";
 
+/**
+ * Draws the two-way pointer between neighboring DLL nodes.
+ */
 function Connector() {
   return (
     <span className="relative h-4 w-8 shrink-0">
@@ -13,6 +16,9 @@ function Connector() {
   );
 }
 
+/**
+ * Labels the start and end of the linked list.
+ */
 function EndCap({ label }: { label: string }) {
   return (
     <div className="mb-0.5 flex h-8 items-center rounded-full border border-slate-600/45 bg-[#0b1020] px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-300">
@@ -32,6 +38,12 @@ type DLLDiagramProps = {
   alignTail?: boolean;
 };
 
+/**
+ * Renders either a list of DLL nodes or a display string as a linked-list diagram.
+ *
+ * The value prop is used for final answers that may include a decimal point.
+ * The nodes prop is used for real digit-node arrays from the arithmetic steps.
+ */
 export function DLLDiagram({
   nodes,
   value,

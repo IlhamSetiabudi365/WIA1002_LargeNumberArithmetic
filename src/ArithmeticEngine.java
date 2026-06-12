@@ -1,7 +1,16 @@
 package src;
 
+/**
+ * Contains the arithmetic algorithms for large numbers stored in doubly linked lists.
+ *
+ * Each node stores one digit. The algorithms usually start from the tail because
+ * the tail contains the least significant digit, just like doing calculations by hand.
+ */
 public class ArithmeticEngine {
 
+    /**
+     * Adds two large non-negative numbers digit by digit from right to left.
+     */
     public static DoublyLinkedList add(DoublyLinkedList a, DoublyLinkedList b){
         DoublyLinkedList result = new DoublyLinkedList();
 
@@ -9,32 +18,38 @@ public class ArithmeticEngine {
         Node pB = b.getTail();
         int carry = 0;
 
+        // Continue while either number still has digits, or there is a leftover carry.
         while(pA != null || pB != null || carry != 0){
-
             int valA = (pA != null) ? pA.digit : 0;
             int valB = (pB != null) ? pB.digit : 0;
 
             int sum = valA + valB + carry;
             carry = sum / 10;
 
+            // The current result digit is inserted at the front because we scan right to left.
             result.addFront(sum % 10);
 
             if (pA != null) pA = pA.prev;
             if (pB != null) pB = pB.prev;
-
         }
         
         result.stripLeadingZeros();
         return result;
     }
 
+    /**
+     * Subtracts b from a.
+     *
+     * If b is larger than a, the absolute difference is calculated first and the
+     * result is marked as negative.
+     */
     public static DoublyLinkedList subtract(DoublyLinkedList a, DoublyLinkedList b){
-
         int cmp = DoublyLinkedList.compare(a, b);
         if (cmp == 0) {
             return DoublyLinkedList.parse("0");
         }
 
+        // Always subtract the smaller absolute value from the bigger absolute value.
         DoublyLinkedList bigger = (cmp == 1) ? a : b;
         DoublyLinkedList smaller = (cmp == 1) ? b : a;
 
@@ -45,6 +60,7 @@ public class ArithmeticEngine {
         Node p2 = smaller.getTail();
         int borrow = 0;
 
+        // Perform normal column subtraction from the least significant digit.
         while(p1 != null){
             int v1 = p1.digit;
             int v2 = (p2 != null) ? p2.digit : 0;
@@ -66,78 +82,83 @@ public class ArithmeticEngine {
 
         result.stripLeadingZeros();
         return result;
-
-
     }
 
+    /**
+     * Multiplies two large numbers using the same partial-product method used by hand.
+     */
     public static DoublyLinkedList multiply(DoublyLinkedList a, DoublyLinkedList b) {
-    // 1. Handle base cases (if either number is 0)
-    if (isZero(a) || isZero(b)) {
-        return DoublyLinkedList.parse("0");
-    }
+        if (isZero(a) || isZero(b)) {
+            return DoublyLinkedList.parse("0");
+        }
 
-    DoublyLinkedList finalResult = DoublyLinkedList.parse("0");
-    Node pB = b.getTail();
-    int shiftCount = 0; // Tracks how many zeros to append for place value (tens, hundreds, etc.)
+        DoublyLinkedList finalResult = DoublyLinkedList.parse("0");
+        Node pB = b.getTail();
+        int shiftCount = 0; // Number of place-value zeros to append.
 
-    // 2. Loop through each digit of the second number (multiplier) from right to left
-    while (pB != null) {
-        int digitB = pB.digit;
-        
-        // Skip multiplication if the digit is 0 to save time, just increment the shift
-        if (digitB == 0) {
+        // Loop through each multiplier digit from right to left.
+        while (pB != null) {
+            int digitB = pB.digit;
+            
+            // A zero multiplier digit contributes only a shifted zero partial product.
+            if (digitB == 0) {
+                shiftCount++;
+                pB = pB.prev;
+                continue;
+            }
+
+            DoublyLinkedList partialProduct = new DoublyLinkedList();
+            Node pA = a.getTail();
+            int carry = 0;
+
+            // Multiply the current multiplier digit with every digit of a.
+            while (pA != null || carry != 0) {
+                int digitA = (pA != null) ? pA.digit : 0;
+                
+                int product = (digitA * digitB) + carry;
+                carry = product / 10;
+                partialProduct.addFront(product % 10);
+
+                if (pA != null) pA = pA.prev;
+            }
+
+            // Shift the partial product according to the multiplier digit position.
+            for (int i = 0; i < shiftCount; i++) {
+                DoublyLinkedList.appendZero(partialProduct);
+            }
+
+            finalResult = ArithmeticEngine.add(finalResult, partialProduct);
+
             shiftCount++;
             pB = pB.prev;
-            continue;
         }
 
-        DoublyLinkedList partialProduct = new DoublyLinkedList();
-        Node pA = a.getTail();
-        int carry = 0;
-
-        // 3. Multiply digitB with every digit of List A
-        while (pA != null || carry != 0) {
-            int digitA = (pA != null) ? pA.digit : 0;
-            
-            int product = (digitA * digitB) + carry;
-            carry = product / 10;
-            partialProduct.addFront(product % 10);
-
-            if (pA != null) pA = pA.prev;
-        }
-
-        // 4. Shift the partial product by appending zeros based on its position
-        for (int i = 0; i < shiftCount; i++) {
-            DoublyLinkedList.appendZero(partialProduct);
-        }
-
-        // 5. Add this partial product to our running final total
-        finalResult = ArithmeticEngine.add(finalResult, partialProduct);
-
-        // Move to the next digit to the left in List B
-        shiftCount++;
-        pB = pB.prev;
+        // Keep sign handling here so the method also works if negative lists are introduced later.
+        boolean resultIsNegative = a.isNegative() ^ b.isNegative();
+        finalResult.setNegative(resultIsNegative);
+        
+        finalResult.stripLeadingZeros();
+        return finalResult;
     }
 
-    // 6. Final cleanup of signs and leading zeros
-    // (Positive * Negative = Negative, Negative * Negative = Positive)
-    boolean resultIsNegative = a.isNegative() ^ b.isNegative(); // XOR logic for signs
-    finalResult.setNegative(resultIsNegative);
-    
-    finalResult.stripLeadingZeros();
-    return finalResult;
-}
+    /**
+     * Returns true when a list is empty, null, or represents the value zero.
+     */
+    private static boolean isZero(DoublyLinkedList list) {
+        if (list == null || list.getTail() == null) return true;
 
-// Helper method to check if a list represents zero
-private static boolean isZero(DoublyLinkedList list) {
-    if (list == null || list.getTail() == null) return true;
-    DoublyLinkedList normalized = DoublyLinkedList.copy(list);
-    normalized.stripLeadingZeros();
-    return normalized.toString().equals("0");
-}
+        DoublyLinkedList normalized = DoublyLinkedList.copy(list);
+        normalized.stripLeadingZeros();
+        return normalized.toString().equals("0");
+    }
 
+    /**
+     * Divides a by b and returns either an integer quotient or a display-only decimal result.
+     *
+     * The integer part is found using repeated subtraction with scaled divisors.
+     * The decimal part is calculated up to 20 digits after the decimal point.
+     */
     public static DoublyLinkedList divide(DoublyLinkedList a, DoublyLinkedList b) {
-
         DoublyLinkedList dividend = DoublyLinkedList.copy(a);
         DoublyLinkedList divisor = DoublyLinkedList.copy(b);
         dividend.stripLeadingZeros();
@@ -154,17 +175,12 @@ private static boolean isZero(DoublyLinkedList list) {
         DoublyLinkedList remainder = dividend;
         DoublyLinkedList quotient  = DoublyLinkedList.parse("0");
 
-        // BAGIAN INTEGER
-        // selama remainder masih >= b, cari kelipatan b yang paling
-        // besar tapi masih muat di remainder, terus kurangi
+        // Integer part: keep reducing the remainder until it is smaller than the divisor.
         while (DoublyLinkedList.compare(remainder, divisor) >= 0) {
-
-            // scale up b dulu - kalikan b dengan 10 berulang kali
-            // sampai b * 10 sudah tidak muat lagi di dalam remainder
             DoublyLinkedList scaledB = DoublyLinkedList.copy(divisor);
             int zeroCount = 0;
 
-            // tempCheck = scaledB * 10, buat ngecek apakah masih muat
+            // Find the largest divisor * 10^zeroCount that still fits in the remainder.
             DoublyLinkedList tempCheck = DoublyLinkedList.copy(scaledB);
             DoublyLinkedList.appendZero(tempCheck);
 
@@ -176,16 +192,14 @@ private static boolean isZero(DoublyLinkedList list) {
                 DoublyLinkedList.appendZero(tempCheck);
             }
 
-            // hitung berapa kali scaledB bisa dikurangi dari remainder
-            // ini ngasih satu digit dari hasil bagi
+            // Count how many times the scaled divisor fits in the current remainder.
             int digitCount = 0;
             while (DoublyLinkedList.compare(remainder, scaledB) >= 0) {
                 remainder = subtract(remainder, scaledB);
                 digitCount++;
             }
 
-            // tambahkan digitCount * 10^zeroCount ke quotient
-            // contoh: digitCount=3, zeroCount=2 -> toAdd = 300
+            // Add digitCount * 10^zeroCount to the quotient.
             DoublyLinkedList toAdd = DoublyLinkedList.parse(String.valueOf(digitCount));
             for (int i = 0; i < zeroCount; i++) {
                 DoublyLinkedList.appendZero(toAdd);
@@ -195,24 +209,18 @@ private static boolean isZero(DoublyLinkedList list) {
 
         quotient.stripLeadingZeros();
 
-        // kalau remainder sudah 0, berarti bagi pas, ga perlu desimal
+        // Exact division: no decimal digits are needed.
         if (isZero(remainder)) {
             return quotient;
         }
 
-        // BAGIAN DESIMAL
-        // remainder masih ada, lanjut hitung angka di belakang koma
-        // kalikan remainder dengan 10 (appendZero), cari berapa kali b muat
-        // ulangi sampai 20 angka atau remainder habis
+        // Decimal part: multiply the remainder by 10 for each decimal place.
         StringBuilder decimalDigits = new StringBuilder();
         int decimalCount = 0;
 
         while (decimalCount < 20) {
-
-            // kalikan remainder dengan 10 (pakai Role 1)
             DoublyLinkedList.appendZero(remainder);
 
-            // hitung berapa kali b muat di remainder yang udah dikali 10
             int digit = 0;
             while (DoublyLinkedList.compare(remainder, divisor) >= 0) {
                 remainder = subtract(remainder, divisor);
@@ -222,13 +230,12 @@ private static boolean isZero(DoublyLinkedList list) {
             decimalDigits.append(digit);
             decimalCount++;
 
-            // kalau sisa nya udah 0, berhenti lebih awal
+            // Stop early if the decimal expansion ends.
             if (isZero(remainder)) {
                 break;
             }
         }
 
-        // GABUNGIN HASIL INTEGER + DESIMAL
         final String integerResult = quotient.toString();
         final String decimalResult = decimalDigits.toString();
 

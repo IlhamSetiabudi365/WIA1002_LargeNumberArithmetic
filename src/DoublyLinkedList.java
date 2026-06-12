@@ -1,5 +1,12 @@
 package src;
 
+/**
+ * Represents a large number as a doubly linked list of digits.
+ *
+ * The head stores the most significant digit and the tail stores the least
+ * significant digit. This layout allows the arithmetic algorithms to start from
+ * the tail, which matches normal right-to-left column arithmetic.
+ */
 public class DoublyLinkedList {
     private Node head;
     private Node tail;
@@ -18,10 +25,10 @@ public class DoublyLinkedList {
     public void setNegative(boolean val) { this.isNegative = val; }
 
     public boolean isNegative() { return this.isNegative; }
+
     /**
      * Adds a new digit node to the END (tail) of the list.
-     * Used by: parse(), copy(), appendZero()
-     * Useful for: ALL ROLES — core building block for constructing result lists.
+     * This is used when building a number from left to right.
      */
     public void addBack(int digit){
         Node newNode = new Node(digit);
@@ -40,8 +47,7 @@ public class DoublyLinkedList {
 
     /**
      * Adds a new digit node to the FRONT (head) of the list.
-     * Used when building results digit by digit from right to left (least significant to most significant).
-     * Useful for: ROLE 2 (addition, subtraction) — results are built by prepending digits.
+     * This is useful when an algorithm calculates digits from right to left.
      */
     public void addFront(int digit){
         Node newNode = new Node(digit);
@@ -61,8 +67,7 @@ public class DoublyLinkedList {
     /**
      * Converts a number string (e.g. "123456789") into a DoublyLinkedList.
      * Each character is converted to an int digit and stored as a separate node.
-     * Example: "123" → [1] ↔ [2] ↔ [3]
-     * Useful for: ROLE 5 (CLI) — call this to parse user input into a list before passing to arithmetic methods.
+     * Example: "123" becomes [1] <-> [2] <-> [3].
      */
     public static DoublyLinkedList parse(String num) {
         DoublyLinkedList list = new DoublyLinkedList();
@@ -78,15 +83,14 @@ public class DoublyLinkedList {
 
     /**
      * Prints the number represented by this list to the console.
-     * Traverses from head to tail, printing each digit.
-     * Prints a "-" sign first if the number is negative (isNegative = true).
-     * Example: [1] ↔ [2] ↔ [3] → prints "123"
-     * Useful for: ROLE 5 (CLI) — call this to print the final result of any operation.
      */
     public void display(){
         System.out.println(this);
     }
 
+    /**
+     * Converts the linked list back into a normal display string.
+     */
     public String toString(){
         StringBuilder number = new StringBuilder();
         Node curr = head;
@@ -123,11 +127,7 @@ public class DoublyLinkedList {
 
     /**
      * Removes leading zero nodes from the front of the list.
-     * Stops when the head digit is non-zero OR only one node remains (to preserve "0" as a valid result).
-     * Example: [0] ↔ [0] ↔ [1] ↔ [2] → [1] ↔ [2]
-     * Useful for: ROLE 2 (subtraction) — call this after every subtraction to clean up the result.
-     *             ROLE 3 (multiplication) — call after building the final product.
-     *             ROLE 4 (division) — call after building the quotient.
+     * One zero node is kept so the number zero can still be represented.
      */
     public void stripLeadingZeros(){
         if (head == null) {
@@ -148,15 +148,10 @@ public class DoublyLinkedList {
 
     /**
      * Compares two lists as numbers.
-     * Returns:  1 if a > b
-     *          -1 if a < b
-     *           0 if a == b
-     * First compares by size (more digits = larger number).
-     * If sizes are equal, compares digit by digit from left to right.
-     * Useful for: ROLE 2 (subtraction) — determines which number is larger before subtracting.
-     *             ROLE 4 (division) — checks if the current chunk is still larger than the divisor.
+     * Returns 1 if a > b, -1 if a < b, and 0 if both values are equal.
      */
     public static int compare(DoublyLinkedList a, DoublyLinkedList b){
+        // A number with more digits is larger after leading zeros have been removed.
         if(a.size > b.size){
             return 1;
         }
@@ -167,6 +162,7 @@ public class DoublyLinkedList {
             Node currA = a.head;
             Node currB = b.head;
             
+            // If lengths match, compare digit by digit from most significant to least.
             while(currA != null && currB != null){
                 if (currA.digit > currB.digit){return 1;}
                 if (currA.digit < currB.digit){return -1;}
@@ -178,10 +174,8 @@ public class DoublyLinkedList {
     }
 
     /**
-     * Creates a deep copy of a list — fully independent from the original.
-     * Modifying the copy will NOT affect the original list.
-     * Useful for: ROLE 3 (multiplication) — makes a fresh copy of the multiplicand for each digit
-     *             of the multiplier, so the original number is never modified during calculation.
+     * Creates a deep copy of a list.
+     * Modifying the copy will not affect the original list.
      */
     public static DoublyLinkedList copy(DoublyLinkedList originalList){
         DoublyLinkedList copiedList = new DoublyLinkedList();
@@ -195,10 +189,7 @@ public class DoublyLinkedList {
 
     /**
      * Appends a zero node to the tail of the list, effectively multiplying the number by 10.
-     * Example: [4] ↔ [2] → [4] ↔ [2] ↔ [0] (42 becomes 420)
-     * Useful for: ROLE 3 (multiplication) — shifts intermediate results to correct position
-     *                                        (units digit = no shift, tens digit = 1 zero, etc.)
-     *             ROLE 4 (division) — multiplies remainder by 10 to continue decimal calculation.
+     * Example: [4] <-> [2] becomes [4] <-> [2] <-> [0], so 42 becomes 420.
      */
     public static void appendZero(DoublyLinkedList list){
         list.addBack(0);

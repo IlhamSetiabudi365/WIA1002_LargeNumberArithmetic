@@ -4,6 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Shared design tokens for the visualizer theme. */
 :root {
   --app-bg: #0b0f1a;
   --panel: #111827;
@@ -25,6 +26,7 @@ html {
   background: var(--app-bg);
 }
 
+/* Global page background and base typography. */
 body {
   margin: 0;
   background:
@@ -44,6 +46,7 @@ input {
   color: white;
 }
 
+/* Custom scrollbar used by horizontally scrolling linked-list diagrams. */
 .dll-scroll {
   scrollbar-width: thin;
   scrollbar-color: rgba(148, 163, 184, 0.45) rgba(15, 23, 42, 0.55);

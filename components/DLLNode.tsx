@@ -9,6 +9,10 @@ type DLLNodeProps = {
   decimal?: boolean;
 };
 
+/**
+ * Visual representation of one digit node in the doubly linked list.
+ * Different states highlight active, processed, and decimal-point nodes.
+ */
 export function DLLNode({ value, active = false, processed = false, decimal = false }: DLLNodeProps) {
   const baseClass =
     "relative flex h-10 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border text-lg font-semibold shadow-lg";
